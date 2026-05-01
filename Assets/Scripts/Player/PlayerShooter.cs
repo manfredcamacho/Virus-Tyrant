@@ -1,5 +1,5 @@
-// Autor: Pathogen Zero Team
-// Email: dev@pathogenzero.local
+// Autor: Manfred Camacho
+// Email: manfred.camacho.dev@gmail.com
 // Funcion: Controla cadencia y patron de disparo segun estado evolutivo.
 using UnityEngine;
 
@@ -11,6 +11,7 @@ public class PlayerShooter : MonoBehaviour, IFireController
     [SerializeField] private ProjectileSpawner rightSpawner;
     [SerializeField] private PlayerEvolutionController evolutionController;
     [SerializeField] private float fireInterval = 0.2f;
+    [SerializeField] private bool enableDebugLogs = true;
 
     private IMovementInputReader inputReader;
     private float fireCooldown;
@@ -18,6 +19,7 @@ public class PlayerShooter : MonoBehaviour, IFireController
     private void Awake()
     {
         inputReader = inputReaderBehaviour as IMovementInputReader;
+        Log("Awake -> inputReader " + (inputReader != null ? "ok." : "null."));
     }
 
     private void Update()
@@ -42,18 +44,47 @@ public class PlayerShooter : MonoBehaviour, IFireController
             return;
         }
 
-        if (centerSpawner != null)
-        {
-            centerSpawner.Spawn();
-        }
+        EvolutionState currentState = evolutionController != null
+            ? evolutionController.CurrentState
+            : EvolutionState.Base;
 
-        bool evolved = evolutionController != null && evolutionController.CurrentState == EvolutionState.State2;
-        if (evolved)
+        switch (currentState)
         {
-            leftSpawner?.Spawn();
-            rightSpawner?.Spawn();
+            case EvolutionState.State3:
+                centerSpawner?.Spawn();
+                leftSpawner?.Spawn();
+                rightSpawner?.Spawn();
+                Log("Disparo State3 -> 3 balas.");
+                break;
+
+            case EvolutionState.State2:
+                if (leftSpawner != null && rightSpawner != null)
+                {
+                    leftSpawner.Spawn();
+                    rightSpawner.Spawn();
+                    Log("Disparo State2 -> 2 balas.");
+                }
+                else
+                {
+                    centerSpawner?.Spawn();
+                    Log("Disparo State2 con fallback -> 1 bala (faltan spawners laterales).");
+                }
+                break;
+
+            default:
+                centerSpawner?.Spawn();
+                Log("Disparo Base -> 1 bala.");
+                break;
         }
 
         fireCooldown = fireInterval;
+    }
+
+    private void Log(string message)
+    {
+        if (enableDebugLogs)
+        {
+            Debug.Log("[PlayerShooter] " + message, this);
+        }
     }
 }

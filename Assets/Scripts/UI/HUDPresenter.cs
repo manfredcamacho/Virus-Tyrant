@@ -1,16 +1,22 @@
-// Autor: Pathogen Zero Team
-// Email: dev@pathogenzero.local
+// Autor: Manfred Camacho
+// Email: manfred.camacho.dev@gmail.com
 // Funcion: Sincroniza HUD con vidas, estado evolutivo y progreso de evolucion.
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class HUDPresenter : MonoBehaviour
 {
     [SerializeField] private PlayerHealthController playerHealth;
     [SerializeField] private PlayerEvolutionController playerEvolution;
-    [SerializeField] private Text livesText;
-    [SerializeField] private Text stateText;
-    [SerializeField] private Text killsProgressText;
+    [SerializeField] private LevelFlowController levelFlow;
+    [SerializeField] private TMP_Text livesText;
+    [SerializeField] private TMP_Text stateText;
+    [SerializeField] private TMP_Text killsProgressText;
+    [SerializeField] private TMP_Text currentLevelText;
+    [SerializeField] private TMP_Text scoreTotalText;
+    [SerializeField] private bool enableDebugLogs = true;
+
+    private int totalScore;
 
     private void OnEnable()
     {
@@ -21,9 +27,16 @@ public class HUDPresenter : MonoBehaviour
 
         if (playerEvolution != null)
         {
-            playerEvolution.StateChanged += OnStateChanged;
             playerEvolution.KillsProgressChanged += OnKillsProgressChanged;
         }
+
+        if (levelFlow != null)
+        {
+            levelFlow.CurrentLevelChanged += OnCurrentLevelChanged;
+            levelFlow.RemainingEnemiesChanged += OnRemainingEnemiesChanged;
+        }
+
+        EnemyHealth.EnemyKilled += OnEnemyKilled;
     }
 
     private void Start()
@@ -35,9 +48,17 @@ public class HUDPresenter : MonoBehaviour
 
         if (playerEvolution != null)
         {
-            OnStateChanged(playerEvolution.CurrentState);
-            OnKillsProgressChanged(playerEvolution.CurrentKills, playerEvolution.KillsToEvolve);
+            OnKillsProgressChanged(playerEvolution.CurrentKills, playerEvolution.KillsToNextEvolution);
         }
+
+        if (levelFlow != null)
+        {
+            OnCurrentLevelChanged(1);
+            OnRemainingEnemiesChanged(0);
+        }
+
+        totalScore = 0;
+        RefreshScore();
     }
 
     private void OnDisable()
@@ -49,32 +70,72 @@ public class HUDPresenter : MonoBehaviour
 
         if (playerEvolution != null)
         {
-            playerEvolution.StateChanged -= OnStateChanged;
             playerEvolution.KillsProgressChanged -= OnKillsProgressChanged;
         }
+
+        if (levelFlow != null)
+        {
+            levelFlow.CurrentLevelChanged -= OnCurrentLevelChanged;
+            levelFlow.RemainingEnemiesChanged -= OnRemainingEnemiesChanged;
+        }
+
+        EnemyHealth.EnemyKilled -= OnEnemyKilled;
     }
 
     private void OnLivesChanged(int lives)
     {
         if (livesText != null)
         {
-            livesText.text = "Lives: " + lives;
+            livesText.text = "Vidas: " + lives;
         }
+        Log("HUD vidas -> " + lives);
     }
 
-    private void OnStateChanged(EvolutionState evolutionState)
+    private void OnRemainingEnemiesChanged(int remainingEnemies)
     {
         if (stateText != null)
         {
-            stateText.text = evolutionState == EvolutionState.State2 ? "State: 2" : "State: 1";
+            stateText.text = "Enemigos restantes: " + Mathf.Max(0, remainingEnemies);
         }
+        Log("HUD restantes -> " + remainingEnemies);
     }
 
     private void OnKillsProgressChanged(int current, int required)
     {
         if (killsProgressText != null)
         {
-            killsProgressText.text = "Evolve: " + current + "/" + required;
+            killsProgressText.text = "Evolucion: " + current + "/" + required;
+        }
+        Log("HUD progreso -> " + current + "/" + required);
+    }
+
+    private void OnCurrentLevelChanged(int level)
+    {
+        if (currentLevelText != null)
+        {
+            currentLevelText.text = "Nivel " + level + " - 3";
+        }
+    }
+
+    private void OnEnemyKilled()
+    {
+        totalScore++;
+        RefreshScore();
+    }
+
+    private void RefreshScore()
+    {
+        if (scoreTotalText != null)
+        {
+            scoreTotalText.text = "Score: " + totalScore;
+        }
+    }
+
+    private void Log(string message)
+    {
+        if (enableDebugLogs)
+        {
+            Debug.Log("[HUDPresenter] " + message, this);
         }
     }
 }

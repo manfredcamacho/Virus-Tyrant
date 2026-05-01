@@ -1,5 +1,5 @@
-// Autor: Pathogen Zero Team
-// Email: dev@pathogenzero.local
+// Autor: Manfred Camacho
+// Email: manfred.camacho.dev@gmail.com
 // Funcion: Reubica al jugador en un punto de respawn y limpia su velocidad.
 using UnityEngine;
 

@@ -1,5 +1,5 @@
-// Autor: Pathogen Zero Team
-// Email: dev@pathogenzero.local
+// Autor: Manfred Camacho
+// Email: manfred.camacho.dev@gmail.com
 // Funcion: Mueve un proyectil y aplica daño al colisionar.
 using UnityEngine;
 
@@ -9,6 +9,7 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float speed = 12f;
     [SerializeField] private float lifeSeconds = 4f;
     [SerializeField] private int damage = 1;
+    [SerializeField] private bool enableDebugLogs = true;
 
     private Vector2 moveDirection = Vector2.up;
     private float lifeTimer;
@@ -18,6 +19,7 @@ public class Projectile : MonoBehaviour
         moveDirection = direction.normalized;
         damage = overrideDamage;
         lifeTimer = lifeSeconds;
+        Log("Initialize -> direction: " + moveDirection + ", damage: " + damage + ", life: " + lifeSeconds);
     }
 
     private void Update()
@@ -36,8 +38,21 @@ public class Projectile : MonoBehaviour
         IDamageable damageable = other.GetComponent<IDamageable>();
         if (damageable != null)
         {
+            Log("Impacto contra: " + other.name + ". Aplica daño: " + damage);
             damageable.TakeDamage(damage);
             Destroy(gameObject);
+        }
+        else
+        {
+            Log("Colisión sin IDamageable con: " + other.name);
+        }
+    }
+
+    private void Log(string message)
+    {
+        if (enableDebugLogs)
+        {
+            Debug.Log("[Projectile] " + message, this);
         }
     }
 }

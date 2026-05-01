@@ -1,5 +1,5 @@
-// Autor: Pathogen Zero Team
-// Email: dev@pathogenzero.local
+// Autor: Manfred Camacho
+// Email: manfred.camacho.dev@gmail.com
 // Funcion: Define operaciones basicas para componentes de salud.
 public interface IHealth
 {

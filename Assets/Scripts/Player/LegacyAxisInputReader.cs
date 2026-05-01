@@ -1,5 +1,5 @@
-// Autor: Pathogen Zero Team
-// Email: dev@pathogenzero.local
+// Autor: Manfred Camacho
+// Email: manfred.camacho.dev@gmail.com
 // Funcion: Lee input Legacy Input Manager para movimiento y disparo.
 using UnityEngine;
 
